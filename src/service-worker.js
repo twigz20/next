@@ -1,6 +1,7 @@
 import DatabaseServer from './db';
 import WebServer from './web-server';
 import docs from './docs';
+import editor from './editor/dist/routes.js';
 
 /* global workbox */
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/3.2.0/workbox-sw.js');
@@ -13,6 +14,9 @@ workbox.clientsClaim();
 
 // Setup routes for main docs content
 docs.init(workbox);
+
+// Setup routes for /edit/* routes
+editor.init(workbox);
 
 // Create WebServer and associated /www/* routes
 const webServer = new WebServer();
