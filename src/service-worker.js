@@ -1,7 +1,7 @@
 import DatabaseServer from './db';
 import WebServer from './web-server';
 import docs from './docs';
-import editor from './editor/dist/routes.js';
+import editor from './editor/src/routes.js';
 
 /* global workbox */
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/3.2.0/workbox-sw.js');
