@@ -1,1 +1,0 @@
-define({GETTING_STARTED:"fi/Aloitus",ADOBE_THIRD_PARTY:"http://www.adobe.com/go/thirdparty_fi/",WEB_PLATFORM_DOCS_LICENSE:"http://creativecommons.org/licenses/by/3.0/deed.fi"});

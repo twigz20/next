@@ -1,1 +1,0 @@
-define({GETTING_STARTED:"pt-pt/Primeiros Passos"});
