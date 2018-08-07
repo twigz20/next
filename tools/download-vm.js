@@ -10,21 +10,14 @@ const fs = require('fs');
 const path = require('path');
 const mkdirp = require('mkdirp');
 
-const isoUrl = 'https://copy.sh/v86/images/linux3.iso';
-const biosUrl = 'https://github.com/copy/v86/blob/master/bios/seabios.bin?raw=true';
-const vgaBiosUrl = 'https://github.com/copy/v86/blob/master/bios/vgabios.bin?raw=true';
-
 // Put all binary files in `dist/terminal/bin` and we'll cache these on travis.
 const terminalDir = path.join(__dirname, '..', 'dist', 'terminal', 'bin');
-const isoDestPath = path.join(terminalDir, 'linux3.iso');
-const biosDestPath = path.join(terminalDir, 'seabios.bin');
-const vgaBiosDest = path.join(terminalDir, 'vgabios.bin');
 
 const download = (url, dest) => {
     return new Promise((resolve, reject) => {
         fs.stat(dest, err => {
-            if(err) {
-                if(err.code !== 'ENOENT') {
+            if (err) {
+                if (err.code !== 'ENOENT') {
                     return reject(err);
                 } else {
                     console.log(`Downloading ${url} to ${dest}...`);
@@ -33,7 +26,9 @@ const download = (url, dest) => {
                         .on('finish', resolve);
                 }
             } else {
-                console.log(`Skipping download for ${dest}. File already exists`);
+                console.log(
+                    `Skipping download for ${dest}. File already exists`
+                );
                 return resolve();
             }
         });
@@ -41,13 +36,33 @@ const download = (url, dest) => {
 };
 
 mkdirp(terminalDir, err => {
-    if(err) throw err;
+    if (err) throw err;
 
-    Promise.all([
-        download(isoUrl, isoDestPath),
-        download(biosUrl, biosDestPath),
-        download(vgaBiosUrl, vgaBiosDest)
-    ])
-        .then(() => console.log('Done.'))
-        .catch(err => console.error(err));
+    request.get(
+        {
+            url: 'https://api.github.com/repos/humphd/next/releases/latest',
+            json: true,
+            headers: {
+                'User-Agent': 'Request-Promise',
+            },
+        },
+        (err, resp, release) => {
+            if (err) throw err;
+            if (resp.statusCode !== 200)
+                throw `Unable to get latest release. ${resp.statusMessage}`;
+            Promise.all(
+                release.assets.map(el =>
+                    download(
+                        el.browser_download_url,
+                        path.join(
+                            terminalDir,
+                            path.basename(el.browser_download_url)
+                        )
+                    )
+                )
+            )
+                .then(() => console.log('Done'))
+                .catch(err => console.error(err));
+        }
+    );
 });

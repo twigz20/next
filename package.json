@@ -11,12 +11,17 @@
         "prebuild-docs": "npm run build-server",
         "build-docs": "cd src/docs/website && npm run build",
         "build-editor": "cd src/editor && npm run build",
+        "build-io": "parcel build src/io/io.html",
         "build-server": "parcel build src/index.html",
-        "build-vm": "node tools/download-vm.js",
-        "prebuild-terminal": "npm run build-vm",
-        "build-terminal": 
-            "parcel build src/terminal/index.html --public-url /terminal --out-dir dist/terminal",
-        "eslint": "eslint --fix tools src/db"
+        "postbuild-server": "npm run build-io -- --public-url /io --out-dir dist/io",
+        "predownload-vm": "npm run build-server",
+        "download-vm": "node tools/download-vm.js",
+        "prebuild-terminal": "npm run download-vm",
+        "build-terminal": "parcel build src/terminal/index.html --public-url /terminal --out-dir dist/terminal",
+        "eslint": "eslint --fix .",
+        "v86:setup": "docker build -t buildroot .",
+        "v86:bash": "cross-env OVERRIDE_CONFIG_DIR=1 node tools/build-v86 -ti --entrypoint \"bash\"",
+        "v86:build": "node tools/build-v86"
     },
     "repository": {
         "type": "git",
@@ -31,16 +36,23 @@
     "dependencies": {
         "dexie": "^2.0.4",
         "filer": "humphd/filer#9p-filer",
+        "jszip": "^3.1.5",
         "mime-types": "^2.1.18",
-        "v86": "humphd/v86#filer-9p-lastknowngood"
+        "strong-data-uri": "^1.0.6",
+        "v86": "humphd/v86#filer-9p-lastknowngood",
+        "xterm": "^3.4.1"
     },
     "devDependencies": {
         "babel-plugin-transform-runtime": "^6.23.0",
         "copy": "^0.3.2",
+        "cross-env": "^5.2.0",
         "eslint": "^4.19.1",
+        "eslint-config-prettier": "^2.9.0",
+        "eslint-plugin-prettier": "^2.6.0",
         "expect-puppeteer": "^3.0.1",
         "husky": "^0.14.3",
         "jest": "^23.1.0",
+        "jest-environment-node": "^22.4.3",
         "jest-puppeteer": "^3.0.1",
         "mkdirp": "^0.5.1",
         "parcel-bundler": "^1.8.1",
@@ -54,6 +66,7 @@
     "jest": {
         "testRegex": "./tests/.*\\.(test|spec)\\.(js|jsx)$",
         "preset": "jest-puppeteer",
-        "setupTestFrameworkScriptFile": "expect-puppeteer"
+        "setupTestFrameworkScriptFile": "expect-puppeteer",
+        "verbose": true
     }
 }
