@@ -42,7 +42,7 @@ const constructResponse = async func => {
 const constructInternalError = async message => {
     return new Response(message, {
         status: 500,
-        statusText: 'Internal Server Error',
+        statusText: "Internal Server Error",
         headers: { 'Content-Type': 'text/html' },
     });
 };
@@ -52,9 +52,13 @@ export default (workbox, ioServer) => {
         ioInRegex,
         async ({ url }) => {
             const path = fullyDecodeURI(url.pathname.match(ioInRegex)[1]);
+            const test = fullyDecodeURI(url.searchParams.get('test'));
             try {
                 await ioServer.createPath(path);
-                return fetch('/io/io.html');
+                if(!test) 
+                    return fetch('/io/io.html');
+                else 
+                    return new Response(JSON.stringify({ ok: true }));
             } catch (err) {
                 return constructInternalError(err.message);
             }
@@ -66,9 +70,13 @@ export default (workbox, ioServer) => {
         ioRemoveRegex,
         async ({ url }) => {
             const path = fullyDecodeURI(url.pathname.match(ioRemoveRegex)[1]);
+            const test = fullyDecodeURI(url.searchParams.get('test'));
             try {
                 await ioServer.deletePath(path);
-                return Response.redirect(`${url.origin}/io/in/`, 302);
+                if(!test)
+                    return Response.redirect(`${url.origin}/io/in/`, 302);
+                else 
+                    return new Response(JSON.stringify({ ok: true }));
             } catch (err) {
                 return constructInternalError(err.message);
             }
@@ -81,9 +89,8 @@ export default (workbox, ioServer) => {
         async ({ event }) => {
             let formData;
             try {
-                formData = await event.request.formData();
+                const files = await event.request.json();
                 return await constructResponse(async () => {
-                    const files = JSON.parse(formData.get('file'));
                     const result = await ioServer.importFiles(files);
                     return {
                         body: JSON.stringify(result),
@@ -102,15 +109,19 @@ export default (workbox, ioServer) => {
         async ({ url }) => {
             const path = fullyDecodeURI(url.pathname.match(ioFromTextRegex)[1]);
             const text = fullyDecodeURI(url.searchParams.get('text'));
+            const test = fullyDecodeURI(url.searchParams.get('test'));
             try {
                 const result = await ioServer.createFileFromEncodedText(
                     path,
                     text
                 );
-                return Response.redirect(
-                    `${url.origin}/io/in${result.path}`,
-                    302
-                );
+                if(!test) 
+                    return Response.redirect(
+                        `${url.origin}/io/in${result.path}`,
+                        302
+                    );
+                else 
+                    return new Response(JSON.stringify({ ok: true }));
             } catch (err) {
                 return constructInternalError(err.message);
             }
@@ -125,15 +136,19 @@ export default (workbox, ioServer) => {
                 url.pathname.match(ioFromDataURIRegex)[1]
             );
             const dataUri = fullyDecodeURI(url.searchParams.get('dataUri'));
+            const test = fullyDecodeURI(url.searchParams.get('test'));
             try {
                 const result = await ioServer.createFileFromEncodedDataURI(
                     path,
                     dataUri
                 );
-                return Response.redirect(
-                    `${url.origin}/io/in${result.path}`,
-                    302
-                );
+                if(!test) 
+                    return Response.redirect(
+                        `${url.origin}/io/in${result.path}`,
+                        302
+                    );
+                else 
+                    return new Response(JSON.stringify({ ok: true }));
             } catch (err) {
                 return constructInternalError(err.message);
             }

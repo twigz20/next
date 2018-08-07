@@ -66,6 +66,7 @@
     "jest": {
         "testRegex": "./tests/.*\\.(test|spec)\\.(js|jsx)$",
         "preset": "jest-puppeteer",
-        "setupTestFrameworkScriptFile": "expect-puppeteer"
+        "setupTestFrameworkScriptFile": "expect-puppeteer",
+        "verbose": true
     }
 }

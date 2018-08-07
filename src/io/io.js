@@ -169,12 +169,10 @@ addEventListener('DOMContentLoaded', () => {
                 .getElementsByTagName('form')[0]
                 .getAttribute('action');
             let bufferFiles = await getBufferFiles();
-            let formData = new FormData();
-            formData.append('file', JSON.stringify(bufferFiles));
 
             fetch(url, {
                 method: 'POST',
-                body: formData,
+                body: JSON.stringify(bufferFiles),
             })
                 .then(res => {
                     return res.json();

@@ -6,7 +6,7 @@ function makeRequest(url, config, page) {
     return page.evaluate(
         (url, req) =>
             fetch(url, req)
-                .then(res => res.json())
+                .then(res => { debugger; return res.json();})
                 .catch(err => err),
         encodeURI(url),
         config
