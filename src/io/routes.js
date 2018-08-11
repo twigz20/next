@@ -55,10 +55,8 @@ export default (workbox, ioServer) => {
             const test = fullyDecodeURI(url.searchParams.get('test'));
             try {
                 await ioServer.createPath(path);
-                if(!test) 
-                    return fetch('/io/io.html');
-                else 
-                    return new Response(JSON.stringify({ ok: true }));
+                if (!test) return await fetch('/io/io.html');
+                else return new Response(JSON.stringify({ ok: true }));
             } catch (err) {
                 return constructInternalError(err.message);
             }
@@ -73,10 +71,9 @@ export default (workbox, ioServer) => {
             const test = fullyDecodeURI(url.searchParams.get('test'));
             try {
                 await ioServer.deletePath(path);
-                if(!test)
+                if (!test)
                     return Response.redirect(`${url.origin}/io/in/`, 302);
-                else 
-                    return new Response(JSON.stringify({ ok: true }));
+                else return new Response(JSON.stringify({ ok: true }));
             } catch (err) {
                 return constructInternalError(err.message);
             }
@@ -115,13 +112,12 @@ export default (workbox, ioServer) => {
                     path,
                     text
                 );
-                if(!test) 
+                if (!test)
                     return Response.redirect(
                         `${url.origin}/io/in${result.path}`,
                         302
                     );
-                else 
-                    return new Response(JSON.stringify({ ok: true }));
+                else return new Response(JSON.stringify({ ok: true }));
             } catch (err) {
                 return constructInternalError(err.message);
             }
@@ -142,13 +138,12 @@ export default (workbox, ioServer) => {
                     path,
                     dataUri
                 );
-                if(!test) 
+                if (!test)
                     return Response.redirect(
                         `${url.origin}/io/in${result.path}`,
                         302
                     );
-                else 
-                    return new Response(JSON.stringify({ ok: true }));
+                else return new Response(JSON.stringify({ ok: true }));
             } catch (err) {
                 return constructInternalError(err.message);
             }
@@ -169,24 +164,30 @@ export default (workbox, ioServer) => {
         ioToRegex,
         async ({ url }) => {
             const path = fullyDecodeURI(url.pathname.match(ioToRegex)[1]);
+            const test = fullyDecodeURI(url.searchParams.get('test'));
             try {
-                return await constructResponse(async () => {
+                if (!test)
+                    return await constructResponse(async () => {
+                        const result = await ioServer.getFileDataURL(path);
+                        const body = `
+                            File Name: ${result.name} </br> </br>
+                            Data URI: </br>
+                            <textarea style="width: 600px;
+                                                    height: 120px;
+                                                    border: 3px solid #cccccc;
+                                                    padding: 5px;
+                                                    font-family: Tahoma, sans-serif;
+                                                    background-position: bottom right;
+                                                    background-repeat: no-repeat;"> ${
+                                                        result.dataurl
+                                                    } </textarea>
+                        `;
+                        return { body: body, type: 'text/html' };
+                    });
+                else {
                     const result = await ioServer.getFileDataURL(path);
-                    const body = `
-                        File Name: ${result.name} </br> </br>
-                        Data URI: </br>
-                        <textarea style="width: 600px;
-                                                   height: 120px;
-                                                   border: 3px solid #cccccc;
-                                                   padding: 5px;
-                                                   font-family: Tahoma, sans-serif;
-                                                   background-position: bottom right;
-                                                   background-repeat: no-repeat;"> ${
-                                                       result.dataurl
-                                                   } </textarea>
-                    `;
-                    return { body: body, type: 'text/html' };
-                });
+                    return new Response(JSON.stringify({ ok: true }));
+                }
             } catch (err) {
                 return constructInternalError(err.message);
             }
@@ -197,9 +198,12 @@ export default (workbox, ioServer) => {
     workbox.routing.registerRoute(
         ioResetRegex,
         async ({ url }) => {
+            const test = fullyDecodeURI(url.searchParams.get('test'));
             try {
                 await formatFS();
-                return Response.redirect(`${url.origin}/io/in/`, 302);
+                if (!test)
+                    return Response.redirect(`${url.origin}/io/in/`, 302);
+                else return new Response(JSON.stringify({ ok: true }));
             } catch (err) {
                 return constructInternalError(err.message);
             }
@@ -217,6 +221,8 @@ export default (workbox, ioServer) => {
             // Make sure we have something rooted in `/` (e.g., "" -> "/")
             path = path.replace(/^\/?/, '/');
 
+            const test = fullyDecodeURI(url.searchParams.get('test'));
+
             try {
                 const blob = await zip(path);
                 const init = {
@@ -228,8 +234,9 @@ export default (workbox, ioServer) => {
                             'attachment; filename="archive.zip"',
                     },
                 };
-
-                return new Response(blob, init);
+                if (!test)
+                    return new Response(blob, init);
+                else return new Response(JSON.stringify({ ok: true }));
             } catch (err) {
                 // Deal with the common case of a path not existing, and 404
                 if (err.code === 'ENOENT') {

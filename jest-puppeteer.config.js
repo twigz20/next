@@ -4,8 +4,7 @@ module.exports = {
         port: process.env.PORT || 3000,
     },
     launch: {
-        devtools: true,
         dumpio: false,
-        // headless: process.env.HEADLESS !== 'false',
+        headless: process.env.HEADLESS !== 'false',
     },
 };
